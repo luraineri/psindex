@@ -14,7 +14,7 @@ setup(
     author_email="luciana.traineri@gmail.com",
     url="https://github.com/luraineri/psindex",
     project_urls={"Documentation": "https://luraineri.github.io/psindex/"},
-    description=("Helper library for manipulation of formatted date/datetime values."),
+    description=("Population Stability Index (PSI) implementation for python."),
     long_description=README(),
     long_description_content_type="text/markdown",
     package_dir={"": "src"},

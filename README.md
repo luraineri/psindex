@@ -1,2 +1,3 @@
 # psindex
-Populational Stability Index (PSI) implementation for python
+
+Population Stability Index (PSI) implementation for python
