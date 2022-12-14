@@ -9,7 +9,7 @@ def README():
 
 setup(
     name="psindex",
-    version="0.0.1",
+    version="0.0.2",
     author="Luciana Trento Raineri",
     author_email="luciana.traineri@gmail.com",
     url="https://github.com/luraineri/psindex",
