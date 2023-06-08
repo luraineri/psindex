@@ -14,6 +14,6 @@ def psi_cat(sample_a, sample_b):
     bi = np.array(bi)
 
     # calc PSI
-    psi = sum((ai - bi) * np.log10(ai / bi))
+    psi = sum((ai - bi) * np.log(ai / bi))
 
     return psi
