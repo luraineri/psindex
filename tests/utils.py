@@ -1,12 +1,9 @@
-from functools import reduce
+from itertools import chain
 from typing import Dict
 
 import pandas as pd
 
 
 def make_series(counts: Dict) -> pd.Series:
-    series = pd.Series(
-        reduce(lambda a, b: a + b, [[elem] * count for elem, count in counts.items()])
-    )
-
-    return series
+    elems = [[elem] * count for elem, count in counts.items()]
+    return pd.Series(chain(*elems))
