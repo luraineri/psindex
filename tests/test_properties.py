@@ -26,5 +26,5 @@ def test_commutative_property(a, b):
         index=range_indexes(min_size=20, max_size=50),
     ),
 )
-def test_identical_samples_property(a):
+def test_identical_samples_property_for_categorical_psi(a):
     assert_almost_equal(psi_cat(a, a), 0)
