@@ -20,11 +20,11 @@ def psi_cat(sample_a, sample_b):
     return psi
 
 
-def psi_cont(sample_a, sample_b, nbins):
+def psi_cont(sample_a, sample_b, nbins: int):
 
-    _, bins = pd.cut(sample_a, bins=nbins, retbins=True)
+    _, bins_edges = pd.cut(sample_a, bins=nbins, retbins=True)
 
-    bucket_a = pd.cut(sample_a, bins=bins)
-    bucket_b = pd.cut(sample_b, bins=bins)
+    bucket_a = pd.cut(sample_a, bins=bins_edges)
+    bucket_b = pd.cut(sample_b, bins=bins_edges)
 
     return psi_cat(bucket_a, bucket_b)
