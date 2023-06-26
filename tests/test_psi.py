@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from numpy.testing import assert_almost_equal
 
-from psindex.psi import psi_cat, psi_cont
+from psindex.psi import psi_cat, psi_cont, calc_freq
 
 from .utils import make_series
 
@@ -36,27 +36,48 @@ def test_same_distribution_series():
 
 
 @pytest.mark.parametrize(
-    ["a", "b", "exp_result"],
+    ["a", "b", "exp_result", "dropna"],
     [
         (
             make_series({"a": 3, "b": 2, "c": 3, "d": 1}),
             make_series({"a": 2, "b": 2, "c": 3, np.nan: 2}),
             0.565913,
+            True,
+        ),
+        (
+            make_series({"a": 3, "b": 2, "c": 3, "d": 1}),
+            make_series({"a": 2, "b": 2, "c": 3, np.nan: 2}),
+            0.563733,
+            False,
         ),
         (
             make_series({"a": 2, "b": 2, "c": 3, np.nan: 2}),
             make_series({"a": 3, "b": 2, "c": 3, "d": 1}),
             0.047231,
+            True,
         ),
         (
             make_series({"a": 3, "b": 2, "c": 3, "d": 1, np.nan: 2}),
             make_series({"a": 3, "b": 2, "c": 3, "d": 1, np.nan: 2}),
             0,
+            True,
+        ),
+        (
+            make_series({"a": 3, "b": 2, "c": 3, "d": 1, np.nan: 2}),
+            make_series({"a": 3, "b": 2, "c": 3, "d": 1, np.nan: 2}),
+            0,
+            False,
+        ),
+        (
+            make_series({"a": 2, "b": 2, "c": 3, np.nan: 2}),
+            make_series({"a": 3, "b": 2, "c": 3, "d": 1}),
+            1.240465,
+            False,
         ),
     ],
 )
-def test_missing_values_cat(a, b, exp_result):
-    assert_almost_equal(psi_cat(a, b), exp_result, decimal=6)
+def test_missing_values_cat(a, b, exp_result, dropna):
+    assert_almost_equal(psi_cat(a, b, dropna=dropna), exp_result, decimal=6)
 
 
 def test_same_proportion_cont():
@@ -109,3 +130,75 @@ def test_same_proportion_cont():
 )
 def test_missing_values_cont(a, b, exp_result, dropna):
     assert_almost_equal(psi_cont(a, b, nbins=3, dropna=dropna), exp_result, decimal=6)
+
+
+@pytest.mark.parametrize(
+    ["a", "b", "dropna", "exp_freq"],
+    [
+        (
+            make_series({"a": 4, "b": 3, "c": 2}),
+            make_series({"a": 3, "b": 2, "c": 3}),
+            False,
+            pd.Series([0.375, 0.25, 0.375], index=["a", "b", "c"]),
+        ),
+        (
+            make_series({"a": 4, "b": 3, "c": 2, np.nan: 1}),
+            make_series({"a": 3, "b": 2, "c": 3, np.nan: 2}),
+            True,
+            pd.Series([0.375, 0.25, 0.375], index=["a", "b", "c"]),
+        ),
+        (
+            make_series({"a": 4, "b": 3, "c": 2, np.nan: 1}),
+            make_series({"a": 3, "b": 2, "c": 3, np.nan: 2}),
+            False,
+            pd.Series([0.3, 0.2, 0.3, 0.2], index=["a", "b", "c", np.nan]),
+        ),
+    ],
+)
+def test_calc_freq_same_categories(a, b, dropna, exp_freq):
+    _, freq_b = calc_freq(a, b, dropna)
+    assert freq_b.equals(exp_freq)
+
+
+@pytest.mark.parametrize(
+    ["a", "b", "dropna", "exp_freq"],
+    [
+        (
+            make_series({"a": 4, "b": 3, "c": 2, "d": 1}),
+            make_series({"a": 3, "b": 2, "c": 3}),
+            False,
+            pd.Series([0.375, 0.25, 0.375, 0.001], index=["a", "b", "c", "d"]),
+        ),
+        (
+            make_series({"a": 4, "b": 3, "c": 2, np.nan: 1}),
+            make_series({"a": 3, "b": 2, "c": 3}),
+            False,
+            pd.Series([0.375, 0.25, 0.375, 0.001], index=["a", "b", "c", np.nan]),
+        ),
+    ],
+)
+def test_calc_freq_missing_category_freq(a, b, dropna, exp_freq):
+    _, freq_b = calc_freq(a, b, dropna)
+    assert freq_b.equals(exp_freq)
+
+
+@pytest.mark.parametrize(
+    ["a", "b", "dropna", "exp_freq"],
+    [
+        (
+            make_series({"a": 4, "b": 3, "c": 2}),
+            make_series({"a": 3, "b": 2, "c": 3, "d": 2}),
+            False,
+            pd.Series([0.3, 0.2, 0.3], index=["a", "b", "c"]),
+        ),
+        (
+            make_series({"a": 4, "b": 3, "c": 2}),
+            make_series({"a": 3, "b": 2, "c": 3, np.nan: 2}),
+            False,
+            pd.Series([0.3, 0.2, 0.3], index=["a", "b", "c"]),
+        ),
+    ],
+)
+def test_calc_freq_extra_category(a, b, dropna, exp_freq):
+    _, freq_b = calc_freq(a, b, dropna)
+    assert freq_b.equals(exp_freq)
